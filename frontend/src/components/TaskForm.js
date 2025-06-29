@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-function TaskForm({ onSubmit, prefilledData, onRealTimeUpdate }) {
+function TaskForm({ onSubmit, prefilledData, onRealTimeUpdate, onEditChange }) {
   const today = new Date();
   const currentYear = today.getFullYear();
 
@@ -112,6 +112,14 @@ function TaskForm({ onSubmit, prefilledData, onRealTimeUpdate }) {
       ...formData,
       [name]: type === 'checkbox' ? checked : value
     });
+
+    // タイトルや説明が編集されたときに編集フラグを立てる
+    if (onEditChange && (name === 'title' || name === 'description')) {
+      const updatedFormData = { ...formData, [name]: value };
+      const isEdited = updatedFormData.title.trim() !== '' || updatedFormData.description.trim() !== '';
+      console.log('📝 Form data changed:', { name, value, isEdited });
+      onEditChange(isEdited);
+    }
   };
 
   const handleOptionSelect = (field, value) => {

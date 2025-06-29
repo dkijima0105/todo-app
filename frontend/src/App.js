@@ -16,7 +16,9 @@ function App() {
   const [showTaskFormModal, setShowTaskFormModal] = useState(false); // モバイル用タスク追加モーダル
   const [showFilterModal, setShowFilterModal] = useState(false); // フィルターモーダル表示用
   const [prefilledTaskData, setPrefilledTaskData] = useState(null); // カレンダーからの事前設定データ
-  const [currentEditingTask, setCurrentEditingTask] = useState(null); // リアルタイム編集用
+  const [currentEditingTask, setCurrentEditingTask] = useState(null);
+  const [tempTaskActive, setTempTaskActive] = useState(false); // 仮タスクが表示中かどうか
+  const [isTaskEdited, setIsTaskEdited] = useState(false); // タスクが編集されたかどうか // リアルタイム編集用
   const [filters, setFilters] = useState({
     urgency: '',
     importance: '',
@@ -255,13 +257,45 @@ function App() {
     setSelectedTask(null);
   };
 
+  // 仮タスクをクリアする処理
+  const clearTempTask = () => {
+    console.log('🗑️ clearTempTask called', { tempTaskActive, isTaskEdited });
+    if (tempTaskActive && !isTaskEdited) {
+      console.log('✅ Clearing temp task');
+      setCurrentEditingTask(null);
+      setTempTaskActive(false);
+      setIsTaskEdited(false);
+      if (isMobile) {
+        setShowTaskFormModal(false);
+      }
+      setPrefilledTaskData(null);
+    } else {
+      console.log('❌ Not clearing temp task', { tempTaskActive, isTaskEdited });
+    }
+  };
+
+  // タスクが編集されたことを記録
+  const handleTaskEditChange = (edited) => {
+    console.log('✏️ Task edit changed:', edited);
+    setIsTaskEdited(edited);
+  };
+
   // カレンダーの時間ブロッククリック処理
   const handleCalendarTimeSlotClick = (presetData) => {
+    console.log('📅 Calendar time slot clicked', presetData);
+    // 既存の仮タスクがあればクリア
+    if (tempTaskActive) {
+      clearTempTask();
+    }
+
     setPrefilledTaskData(presetData);
+    setTempTaskActive(true);
+    setIsTaskEdited(false);
+    console.log('🔧 Temp task activated');
     
-    // リアルタイム編集用の初期データを作成
+    // リアルタイム編集用の初期データを作成（仮タスクとして表示）
     const initialEditingTask = {
-      id: 'editing-current',
+      id: 'temp-task-preview',
       title: '',
       description: '',
       due_date: presetData.due_date,
@@ -270,11 +304,18 @@ function App() {
       urgency: presetData.urgency,
       completed: false,
       is_overdue: false,
-      isEditing: true
+      isEditing: true,
+      isTemp: true // 仮タスクであることを示すフラグ
     };
     
     setCurrentEditingTask(initialEditingTask);
     setShowTaskFormModal(true);
+  };
+
+  // カレンダーの空白エリアクリック処理（仮タスクを削除）
+  const handleCalendarEmptyClick = () => {
+    console.log('🖱️ Calendar empty area clicked');
+    clearTempTask();
   };
 
   // 初回読み込み
@@ -305,13 +346,41 @@ function App() {
   }, [tasks, filters]);
 
   return (
-    <div className="app-container">
+    <div className="app-container" onClick={(e) => {
+      // ボタンやインタラクティブ要素をクリックした場合は何もしない
+      if (e.target.closest('button, input, textarea, select, .task-item, .view-btn, .filter-btn, .nav-btn, .today-btn, .sync-btn, .close-button')) {
+        return;
+      }
+      // タイムスロット領域（タスク作成エリア）をクリックした場合は何もしない
+      if (e.target.closest('.calendar-day, .week-time-cell, .day-time-cell, .week-allday-cell, .day-allday-cell')) {
+        return;
+      }
+      // カレンダー表示時のみ仮タスクをクリア
+      if (viewMode === 'calendar') {
+        console.log('🖱️ App container clicked (calendar mode)');
+        handleCalendarEmptyClick();
+      }
+    }}>
       <div className="container">
         <div className="main-content">
           {/* 横並びレイアウト */}
           <div className="layout-horizontal">
             {/* 左側: マトリックス/リスト表示 */}
-            <div className="matrix-area">
+            <div className="matrix-area" onClick={(e) => {
+              // ボタンやインタラクティブ要素をクリックした場合は何もしない
+              if (e.target.closest('button, input, textarea, select, .task-item, .view-btn, .filter-btn, .nav-btn, .today-btn, .sync-btn')) {
+                return;
+              }
+              // タイムスロット領域（タスク作成エリア）をクリックした場合は何もしない
+              if (e.target.closest('.calendar-day, .week-time-cell, .day-time-cell, .week-allday-cell, .day-allday-cell')) {
+                return;
+              }
+              // カレンダー表示時のみ仮タスクをクリア
+              if (viewMode === 'calendar') {
+                console.log('🖱️ Matrix area clicked (calendar mode)');
+                handleCalendarEmptyClick();
+              }
+            }}>
               {loading ? (
                 <div className="glass-card matrix-card">
                   <p>読み込み中...</p>
@@ -391,6 +460,7 @@ function App() {
                         onTaskClick={handleTaskClick}
                         onTaskUpdate={updateTask}
                         onTaskAdd={handleCalendarTimeSlotClick}
+                        onEmptyClick={handleCalendarEmptyClick}
                         currentEditingTask={currentEditingTask}
                       />
                     )}
@@ -413,7 +483,21 @@ function App() {
 
             {/* 中央: タスク詳細表示（デスクトップのみ） */}
             {!isMobile && (
-              <div className="task-detail-area">
+              <div className="task-detail-area" onClick={(e) => {
+                // ボタンやインタラクティブ要素をクリックした場合は何もしない
+                if (e.target.closest('button, input, textarea, select, .task-item')) {
+                  return;
+                }
+                // タイムスロット領域（タスク作成エリア）をクリックした場合は何もしない
+                if (e.target.closest('.calendar-day, .week-time-cell, .day-time-cell, .week-allday-cell, .day-allday-cell')) {
+                  return;
+                }
+                // カレンダー表示時のみ仮タスクをクリア
+                if (viewMode === 'calendar') {
+                  console.log('🖱️ Task detail area clicked (calendar mode)');
+                  handleCalendarEmptyClick();
+                }
+              }}>
                 {selectedTask ? (
                   <div className="glass-card">
                     <TaskDetail
@@ -448,6 +532,7 @@ function App() {
                     onSubmit={addTask} 
                     prefilledData={prefilledTaskData}
                     onRealTimeUpdate={setCurrentEditingTask}
+                    onEditChange={handleTaskEditChange}
                   />
                 </div>
               </div>
@@ -467,13 +552,23 @@ function App() {
 
           {/* モバイル時のタスク追加モーダル */}
           {isMobile && showTaskFormModal && (
-            <div className="task-form-overlay">
+            <div className="task-form-overlay" onClick={(e) => {
+              // モーダルの外側をクリックした場合は仮タスクをクリア
+              if (e.target === e.currentTarget) {
+                console.log('🖱️ Modal overlay clicked');
+                clearTempTask();
+                setShowTaskFormModal(false);
+                setPrefilledTaskData(null);
+                setCurrentEditingTask(null);
+              }
+            }}>
               <div className="task-form-modal">
                 <div className="task-form-header">
                   <h2>新しいタスクを追加</h2>
                   <button 
                     className="close-button"
                     onClick={() => {
+                      clearTempTask();
                       setShowTaskFormModal(false);
                       setPrefilledTaskData(null);
                       setCurrentEditingTask(null);
@@ -487,6 +582,7 @@ function App() {
                     onSubmit={addTask} 
                     prefilledData={prefilledTaskData}
                     onRealTimeUpdate={setCurrentEditingTask}
+                    onEditChange={handleTaskEditChange}
                   />
                 </div>
               </div>

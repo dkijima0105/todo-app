@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, currentEditingTask }) {
+function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClick, currentEditingTask }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState('month'); // 'month', 'week', 'day'
   const [draggedTask, setDraggedTask] = useState(null);
@@ -470,9 +470,34 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, currentEdit
   const calendarDays = generateCalendarDays();
 
   return (
-    <div className="calendar-view">
-      {/* カレンダーヘッダー */}
-      <div className="calendar-header">
+    <div className="calendar-view" onClick={(e) => {
+      // ボタンやインタラクティブ要素をクリックした場合は何もしない
+      if (e.target.closest('button, .task-item, .view-mode-btn, .nav-btn, .today-btn, .sync-btn')) {
+        return;
+      }
+      // タイムスロット領域（タスク作成エリア）をクリックした場合は何もしない
+      if (e.target.closest('.calendar-day, .week-time-cell, .day-time-cell, .week-allday-cell, .day-allday-cell')) {
+        return;
+      }
+      // カレンダー以外の部分をクリックした場合は仮タスクをクリア
+      if (onEmptyClick && !e.target.closest('.calendar-grid, .week-view, .day-view')) {
+        console.log('🖱️ Calendar view outer area clicked');
+        onEmptyClick();
+      }
+    }}>
+              {/* カレンダーヘッダー */}
+        <div className="calendar-header" onClick={(e) => {
+          // ボタンをクリックした場合は何もしない
+          if (e.target.closest('button, .view-mode-btn, .nav-btn, .today-btn, .sync-btn')) {
+            return;
+          }
+          // ヘッダーエリアをクリックした場合は仮タスクをクリア
+          if (onEmptyClick) {
+            console.log('🖱️ Calendar header area clicked');
+            e.stopPropagation(); // 親要素への伝播を防ぐ
+            onEmptyClick();
+          }
+        }}>
         <div className="calendar-view-controls">
           <div className="view-mode-buttons">
             <button 
@@ -520,7 +545,17 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, currentEdit
       </div>
 
       {/* カレンダーグリッド */}
-      <div className="calendar-grid">
+      <div className="calendar-grid" onClick={(e) => {
+        // タイムスロット領域（タスク作成エリア）をクリックした場合は何もしない
+        if (e.target.closest('.calendar-day, .week-time-cell, .day-time-cell, .week-allday-cell, .day-allday-cell')) {
+          return;
+        }
+        // 背景をクリックした場合は仮タスクをクリア
+        if (onEmptyClick) {
+          console.log('🖱️ Calendar grid background clicked');
+          onEmptyClick();
+        }
+      }}>
         {viewMode === 'month' && (
           <>
             {/* 月表示：曜日ヘッダー */}
@@ -551,6 +586,14 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, currentEdit
                     onDragOver={(e) => handleDragOver(e, day.date)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, day.date)}
+                    onClick={(e) => {
+                      // タスクをクリックした場合は何もしない（タスクの onClick が処理する）
+                      if (e.target.closest('.task-item')) return;
+                      // 空の日付ブロックをクリックした場合は仮タスクをクリア
+                      if (onEmptyClick) {
+                        onEmptyClick();
+                      }
+                    }}
                   >
                     <div className="day-number">
                       {day.date.getDate()}
@@ -632,7 +675,17 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, currentEdit
         )}
 
         {viewMode === 'week' && (
-          <div className="week-view">
+          <div className="week-view" onClick={(e) => {
+            // タイムスロット領域（タスク作成エリア）をクリックした場合は何もしない
+            if (e.target.closest('.week-time-cell, .week-allday-cell')) {
+              return;
+            }
+            // 背景をクリックした場合は仮タスクをクリア
+            if (onEmptyClick) {
+              console.log('🖱️ Week view background clicked');
+              onEmptyClick();
+            }
+          }}>
             {/* 週表示：曜日ヘッダー */}
             <div className="week-header">
               <div className="time-header">時刻</div>
@@ -645,7 +698,17 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, currentEdit
             </div>
 
             {/* 週表示：時間軸とタスク */}
-            <div className="week-content">
+            <div className="week-content" onClick={(e) => {
+              // タイムスロット領域（タスク作成エリア）をクリックした場合は何もしない
+              if (e.target.closest('.week-time-cell, .week-allday-cell')) {
+                return;
+              }
+              // 背景をクリックした場合は仮タスクをクリア
+              if (onEmptyClick) {
+                console.log('🖱️ Week content background clicked');
+                onEmptyClick();
+              }
+            }}>
               {/* 終日行 */}
               <div className="week-allday-row">
                 <div className="time-label allday-label">終日</div>
@@ -773,7 +836,17 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, currentEdit
         )}
 
         {viewMode === 'day' && (
-          <div className="day-view">
+          <div className="day-view" onClick={(e) => {
+            // タイムスロット領域（タスク作成エリア）をクリックした場合は何もしない
+            if (e.target.closest('.day-time-cell, .day-allday-cell')) {
+              return;
+            }
+            // 背景をクリックした場合は仮タスクをクリア
+            if (onEmptyClick) {
+              console.log('🖱️ Day view background clicked');
+              onEmptyClick();
+            }
+          }}>
             {/* 日表示：ヘッダー */}
             <div className="day-header">
               <div className="day-title">
@@ -782,7 +855,17 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, currentEdit
             </div>
 
             {/* 日表示：時間軸とタスク */}
-            <div className="day-content">
+            <div className="day-content" onClick={(e) => {
+              // タイムスロット領域（タスク作成エリア）をクリックした場合は何もしない
+              if (e.target.closest('.day-time-cell, .day-allday-cell')) {
+                return;
+              }
+              // 背景をクリックした場合は仮タスクをクリア
+              if (onEmptyClick) {
+                console.log('🖱️ Day content background clicked');
+                onEmptyClick();
+              }
+            }}>
               {/* 終日行 */}
               <div className="day-allday-row">
                 <div className="time-label allday-label">終日</div>
@@ -902,7 +985,14 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, currentEdit
       </div>
 
       {/* カレンダー統計 */}
-      <div className="calendar-stats">
+      <div className="calendar-stats" onClick={(e) => {
+        // 統計エリアをクリックした場合は仮タスクをクリア
+        if (onEmptyClick) {
+          console.log('🖱️ Calendar stats area clicked');
+          e.stopPropagation(); // 親要素への伝播を防ぐ
+          onEmptyClick();
+        }
+      }}>
         <div className="stats-item">
           <span className="stats-label">今月のタスク:</span>
           <span className="stats-value">
@@ -938,7 +1028,14 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, currentEdit
       </div>
 
       {/* 将来の拡張用：Google連携の説明 */}
-      <div className="future-features">
+      <div className="future-features" onClick={(e) => {
+        // 将来の機能説明エリアをクリックした場合は仮タスクをクリア
+        if (onEmptyClick) {
+          console.log('🖱️ Future features area clicked');
+          e.stopPropagation(); // 親要素への伝播を防ぐ
+          onEmptyClick();
+        }
+      }}>
         <div className="feature-note">
           <p>📅 <strong>今後の機能追加予定:</strong></p>
           <ul>

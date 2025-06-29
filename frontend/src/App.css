@@ -3623,11 +3623,14 @@ body.drag-in-progress {
 .calendar-days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 120px);
   gap: 2px;
 }
 
 .calendar-day {
+  height: 120px !important;
   min-height: 120px;
+  max-height: 120px;
   padding: 8px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 8px;
@@ -3636,6 +3639,8 @@ body.drag-in-progress {
   display: flex;
   flex-direction: column;
   position: relative;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .calendar-day:hover {
@@ -3686,6 +3691,9 @@ body.drag-in-progress {
   flex-direction: column;
   gap: 4px;
   overflow: hidden;
+  min-height: 0;
+  max-height: calc(100% - 30px);
+  /* 日付番号分を差し引く */
 }
 
 .task-item {
@@ -3698,6 +3706,8 @@ body.drag-in-progress {
   white-space: nowrap;
   cursor: pointer;
   transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .task-item:hover {
@@ -3764,6 +3774,11 @@ body.drag-in-progress {
   padding: 2px 4px;
   border-radius: 4px;
   margin-top: 2px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Calendar Statistics */
@@ -3843,7 +3858,11 @@ body.drag-in-progress {
 /* Responsive Design for Calendar */
 @media (max-width: 1366px) {
   .calendar-day {
+    height: 100px !important;
     min-height: 100px;
+    max-height: 100px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .day-number {
@@ -3853,6 +3872,8 @@ body.drag-in-progress {
   .task-item {
     font-size: 10px;
     padding: 3px 6px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .current-month h2,
@@ -3897,9 +3918,17 @@ body.drag-in-progress {
     padding: 15px;
   }
 
+  .calendar-days {
+    grid-template-rows: repeat(6, 80px);
+  }
+
   .calendar-day {
+    height: 80px !important;
     min-height: 80px;
+    max-height: 80px;
     padding: 6px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .day-number {
@@ -3910,6 +3939,8 @@ body.drag-in-progress {
   .task-item {
     font-size: 9px;
     padding: 2px 4px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .more-tasks {
@@ -3975,9 +4006,17 @@ body.drag-in-progress {
     padding: 10px;
   }
 
+  .calendar-days {
+    grid-template-rows: repeat(6, 70px);
+  }
+
   .calendar-day {
+    height: 70px !important;
     min-height: 70px;
+    max-height: 70px;
     padding: 4px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .day-number {
@@ -3988,6 +4027,8 @@ body.drag-in-progress {
   .task-item {
     font-size: 8px;
     padding: 1px 3px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .weekday-header {
@@ -4454,23 +4495,31 @@ body.drag-in-progress {
     height: 12px;
     min-height: 12px;
     max-height: 12px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .day-time-cell {
     height: 16px;
     min-height: 16px;
     max-height: 16px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .week-allday-cell,
   .day-allday-cell {
     min-height: 35px;
     padding: 3px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .day-allday-cell {
     min-height: 40px;
     padding: 6px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .allday-task {
@@ -4501,6 +4550,28 @@ body.drag-in-progress {
     height: 12px;
     min-height: 12px;
     max-height: 12px;
+  }
+
+  /* タスクアイテムの幅を親セルに制限 */
+  .week-time-cell .task-item,
+  .day-time-cell .task-item,
+  .week-allday-cell .task-item,
+  .day-allday-cell .task-item {
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .week-time-cell .task-title,
+  .day-time-cell .task-title,
+  .week-allday-cell .task-title,
+  .day-allday-cell .task-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
   }
 }
 
@@ -4565,6 +4636,8 @@ body.drag-in-progress {
     min-height: 10px;
     max-height: 10px;
     padding: 1px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .day-time-cell {
@@ -4572,17 +4645,23 @@ body.drag-in-progress {
     min-height: 14px;
     max-height: 14px;
     padding: 2px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .week-allday-cell,
   .day-allday-cell {
     min-height: 30px;
     padding: 2px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .day-allday-cell {
     min-height: 35px;
     padding: 4px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .allday-task {
@@ -4638,6 +4717,28 @@ body.drag-in-progress {
     max-height: calc(100vh - 350px);
     min-height: 400px;
   }
+
+  /* タスクアイテムの幅を親セルに制限 */
+  .week-time-cell .task-item,
+  .day-time-cell .task-item,
+  .week-allday-cell .task-item,
+  .day-allday-cell .task-item {
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .week-time-cell .task-title,
+  .day-time-cell .task-title,
+  .week-allday-cell .task-title,
+  .day-allday-cell .task-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -4691,6 +4792,8 @@ body.drag-in-progress {
     min-height: 8px;
     max-height: 8px;
     padding: 1px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .day-time-cell {
@@ -4698,6 +4801,8 @@ body.drag-in-progress {
     min-height: 12px;
     max-height: 12px;
     padding: 1px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .week-time-row {
@@ -4751,11 +4856,15 @@ body.drag-in-progress {
   .day-allday-cell {
     min-height: 25px;
     padding: 1px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .day-allday-cell {
     min-height: 30px;
     padding: 3px;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .allday-task {
@@ -4776,6 +4885,28 @@ body.drag-in-progress {
   .day-content {
     max-height: calc(100vh - 380px);
     min-height: 300px;
+  }
+
+  /* タスクアイテムの幅を親セルに制限 */
+  .week-time-cell .task-item,
+  .day-time-cell .task-item,
+  .week-allday-cell .task-item,
+  .day-allday-cell .task-item {
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .week-time-cell .task-title,
+  .day-time-cell .task-title,
+  .week-allday-cell .task-title,
+  .day-allday-cell .task-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
   }
 }
 
