@@ -279,7 +279,6 @@ function EisenhowerMatrix({ tasks, onTaskClick, onTaskUpdate }) {
             >
               <div className="quadrant-header">
                 <h3>すぐやる</h3>
-                <small>緊急 × 重要</small>
               </div>
               <div className="quadrant-tasks">
                 {getQuadrantTasks('important', 'urgent').map(task => (
@@ -322,7 +321,6 @@ function EisenhowerMatrix({ tasks, onTaskClick, onTaskUpdate }) {
             >
               <div className="quadrant-header">
                 <h3>計画的にやる</h3>
-                <small>重要 × 緊急ではない</small>
               </div>
               <div className="quadrant-tasks">
                 {getQuadrantTasks('important', 'not_urgent').map(task => (
@@ -365,7 +363,6 @@ function EisenhowerMatrix({ tasks, onTaskClick, onTaskUpdate }) {
             >
               <div className="quadrant-header">
                 <h3>委任する</h3>
-                <small>緊急 × 重要ではない</small>
               </div>
               <div className="quadrant-tasks">
                 {getQuadrantTasks('not_important', 'urgent').map(task => (
@@ -408,7 +405,6 @@ function EisenhowerMatrix({ tasks, onTaskClick, onTaskUpdate }) {
             >
               <div className="quadrant-header">
                 <h3>やらない</h3>
-                <small>重要ではない × 緊急ではない</small>
               </div>
               <div className="quadrant-tasks">
                 {getQuadrantTasks('not_important', 'not_urgent').map(task => (

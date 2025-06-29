@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
-function TaskForm({ onSubmit }) {
+function TaskForm({ onSubmit, prefilledData, onRealTimeUpdate }) {
   const today = new Date();
   const currentYear = today.getFullYear();
 
@@ -48,6 +48,64 @@ function TaskForm({ onSubmit }) {
   // 日のオプション
   const dayOptions = Array.from({length: 31}, (_, i) => i + 1);
 
+  // 事前設定データが変更されたときにフォームを更新
+  useEffect(() => {
+    if (prefilledData) {
+      const dueDate = new Date(prefilledData.due_date);
+      setFormData({
+        title: prefilledData.title || '',
+        description: prefilledData.description || '',
+        urgency: prefilledData.urgency || 'not_urgent',
+        importance: prefilledData.importance || 'not_important',
+        due_year: dueDate.getFullYear().toString(),
+        due_month: (dueDate.getMonth() + 1).toString(),
+        due_day: dueDate.getDate().toString(),
+        due_hour: dueDate.getHours().toString(),
+        due_minute: dueDate.getMinutes().toString(),
+        estimated_hours: prefilledData.estimated_hours || '',
+        is_all_day: prefilledData.is_all_day || false
+      });
+    }
+  }, [prefilledData]);
+
+  // 期限日時を構築する関数（useCallbackでメモ化）
+  const constructDateTime = useCallback(() => {
+    const { due_year, due_month, due_day, due_hour, due_minute, is_all_day } = formData;
+    if (due_year && due_month && due_day) {
+      if (is_all_day) {
+        // 終日の場合は23:59:59に設定（タイムゾーン変換対策）
+        const dateStr = `${due_year}-${due_month.padStart(2, '0')}-${due_day.padStart(2, '0')}T23:59:59`;
+        return new Date(dateStr).toISOString();
+      } else {
+        // 通常の場合は指定時刻
+        const hour = due_hour || '8';
+        const minute = due_minute || '0';
+        const dateStr = `${due_year}-${due_month.padStart(2, '0')}-${due_day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`;
+        return new Date(dateStr).toISOString();
+      }
+    }
+    return null;
+  }, [formData.due_year, formData.due_month, formData.due_day, formData.due_hour, formData.due_minute, formData.is_all_day]);
+
+  // リアルタイム更新: formDataが変更されたときにカレンダーに反映
+  useEffect(() => {
+    if (onRealTimeUpdate && prefilledData) {
+      const updatedTask = {
+        id: 'editing-current',
+        title: formData.title || '新しいタスク',
+        description: formData.description,
+        due_date: constructDateTime(),
+        is_all_day: formData.is_all_day,
+        importance: formData.importance,
+        urgency: formData.urgency,
+        completed: false,
+        is_overdue: false,
+        isEditing: true
+      };
+      onRealTimeUpdate(updatedTask);
+    }
+  }, [formData, onRealTimeUpdate, prefilledData, constructDateTime]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -65,23 +123,7 @@ function TaskForm({ onSubmit }) {
 
 
 
-  const constructDateTime = () => {
-    const { due_year, due_month, due_day, due_hour, due_minute, is_all_day } = formData;
-    if (due_year && due_month && due_day) {
-      if (is_all_day) {
-        // 終日の場合は23:59:59に設定（タイムゾーン変換対策）
-        const dateStr = `${due_year}-${due_month.padStart(2, '0')}-${due_day.padStart(2, '0')}T23:59:59`;
-        return new Date(dateStr).toISOString();
-      } else {
-        // 通常の場合は指定時刻
-        const hour = due_hour || '8';
-        const minute = due_minute || '0';
-        const dateStr = `${due_year}-${due_month.padStart(2, '0')}-${due_day.padStart(2, '0')}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`;
-        return new Date(dateStr).toISOString();
-      }
-    }
-    return null;
-  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -119,6 +161,11 @@ function TaskForm({ onSubmit }) {
         estimated_hours: '',
         is_all_day: false
       });
+      
+      // リアルタイム編集もクリア
+      if (onRealTimeUpdate) {
+        onRealTimeUpdate(null);
+      }
     }
   };
 

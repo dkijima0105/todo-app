@@ -4,16 +4,19 @@ import TaskForm from './components/TaskForm';
 import TaskList from './components/TaskList';
 import EisenhowerMatrix from './components/EisenhowerMatrix';
 import TaskDetail from './components/TaskDetail';
+import CalendarView from './components/CalendarView';
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [filteredTasks, setFilteredTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('matrix'); // 'list' or 'matrix'
+  const [viewMode, setViewMode] = useState('matrix'); // 'list', 'matrix', or 'calendar'
   const [selectedTask, setSelectedTask] = useState(null); // 選択されたタスクの詳細表示用
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 1366); // モバイル・タブレット判定
   const [showTaskFormModal, setShowTaskFormModal] = useState(false); // モバイル用タスク追加モーダル
   const [showFilterModal, setShowFilterModal] = useState(false); // フィルターモーダル表示用
+  const [prefilledTaskData, setPrefilledTaskData] = useState(null); // カレンダーからの事前設定データ
+  const [currentEditingTask, setCurrentEditingTask] = useState(null); // リアルタイム編集用
   const [filters, setFilters] = useState({
     urgency: '',
     importance: '',
@@ -91,6 +94,10 @@ function App() {
       if (isMobile) {
         setShowTaskFormModal(false);
       }
+      
+      // 事前設定データをクリア
+      setPrefilledTaskData(null);
+      setCurrentEditingTask(null);
       
       return true; // 成功を示す
     } catch (error) {
@@ -248,6 +255,28 @@ function App() {
     setSelectedTask(null);
   };
 
+  // カレンダーの時間ブロッククリック処理
+  const handleCalendarTimeSlotClick = (presetData) => {
+    setPrefilledTaskData(presetData);
+    
+    // リアルタイム編集用の初期データを作成
+    const initialEditingTask = {
+      id: 'editing-current',
+      title: '',
+      description: '',
+      due_date: presetData.due_date,
+      is_all_day: presetData.is_all_day,
+      importance: presetData.importance,
+      urgency: presetData.urgency,
+      completed: false,
+      is_overdue: false,
+      isEditing: true
+    };
+    
+    setCurrentEditingTask(initialEditingTask);
+    setShowTaskFormModal(true);
+  };
+
   // 初回読み込み
   useEffect(() => {
     fetchTasks();
@@ -306,6 +335,12 @@ function App() {
                         >
                           マトリクス表示
                         </button>
+                        <button 
+                          className={`view-btn ${viewMode === 'calendar' ? 'active' : ''}`}
+                          onClick={() => setViewMode('calendar')}
+                        >
+                          カレンダー表示
+                        </button>
                         {/* フィルタリングボタン（リスト表示時のみ） */}
                         {viewMode === 'list' && (
                           <button 
@@ -342,13 +377,21 @@ function App() {
                         onDelete={deleteTask}
                         onTaskClick={handleTaskClick}
                       />
-                    ) : (
+                    ) : viewMode === 'matrix' ? (
                       <EisenhowerMatrix 
                         tasks={filteredTasks} 
                         onTaskClick={handleTaskClick}
                         onTaskUpdate={async (updatedTask) => {
                           return await updateTask(updatedTask.id, updatedTask);
                         }}
+                      />
+                    ) : (
+                      <CalendarView 
+                        tasks={filteredTasks} 
+                        onTaskClick={handleTaskClick}
+                        onTaskUpdate={updateTask}
+                        onTaskAdd={handleCalendarTimeSlotClick}
+                        currentEditingTask={currentEditingTask}
                       />
                     )}
                     
@@ -401,7 +444,11 @@ function App() {
             {!isMobile && (
               <div className="control-area">
                 <div className="glass-card">
-                  <TaskForm onSubmit={addTask} />
+                  <TaskForm 
+                    onSubmit={addTask} 
+                    prefilledData={prefilledTaskData}
+                    onRealTimeUpdate={setCurrentEditingTask}
+                  />
                 </div>
               </div>
             )}
@@ -426,13 +473,21 @@ function App() {
                   <h2>新しいタスクを追加</h2>
                   <button 
                     className="close-button"
-                    onClick={() => setShowTaskFormModal(false)}
+                    onClick={() => {
+                      setShowTaskFormModal(false);
+                      setPrefilledTaskData(null);
+                      setCurrentEditingTask(null);
+                    }}
                   >
                     ×
                   </button>
                 </div>
                 <div className="task-form-content">
-                  <TaskForm onSubmit={addTask} />
+                  <TaskForm 
+                    onSubmit={addTask} 
+                    prefilledData={prefilledTaskData}
+                    onRealTimeUpdate={setCurrentEditingTask}
+                  />
                 </div>
               </div>
             </div>
