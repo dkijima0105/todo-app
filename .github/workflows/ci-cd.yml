@@ -8,9 +8,9 @@ on:
 
 env:
   REGISTRY: docker.io
-  BACKEND_IMAGE_NAME: dkijima0105/todo-app-backend
-  FRONTEND_IMAGE_NAME: dkijima0105/todo-app-frontend
-  NGINX_IMAGE_NAME: dkijima0105/todo-app-nginx
+  BACKEND_IMAGE_NAME: majikijima/todo-app-backend
+  FRONTEND_IMAGE_NAME: majikijima/todo-app-frontend
+  NGINX_IMAGE_NAME: majikijima/todo-app-nginx
 
 jobs:
   # バックエンドテスト
