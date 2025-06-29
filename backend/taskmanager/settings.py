@@ -2,6 +2,7 @@
 Django settings for taskmanager project.
 """
 
+import os
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -72,16 +73,36 @@ WSGI_APPLICATION = "taskmanager.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "taskmanager",
-        "USER": "taskuser",
-        "PASSWORD": "taskpass",
-        "HOST": "db",
-        "PORT": "5432",
+# DATABASE_URL環境変数がある場合はそれを使用、なければデフォルトのDocker設定
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if DATABASE_URL:
+    # DATABASE_URLが設定されている場合（CI環境など）
+    import urllib.parse
+
+    url = urllib.parse.urlparse(DATABASE_URL)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": url.path[1:],  # パスの最初の/を除去
+            "USER": url.username,
+            "PASSWORD": url.password,
+            "HOST": url.hostname,
+            "PORT": url.port,
+        }
     }
-}
+else:
+    # デフォルトのDocker Compose環境用設定
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "taskmanager",
+            "USER": "taskuser",
+            "PASSWORD": "taskpass",
+            "HOST": "db",
+            "PORT": "5432",
+        }
+    }
 
 
 # Password validation
@@ -89,10 +110,7 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": (
-            "django.contrib.auth.password_validation."
-            "UserAttributeSimilarityValidator"
-        ),
+        "NAME": ("django.contrib.auth.password_validation." "UserAttributeSimilarityValidator"),
     },
     {
         "NAME": ("django.contrib.auth.password_validation." "MinimumLengthValidator"),
