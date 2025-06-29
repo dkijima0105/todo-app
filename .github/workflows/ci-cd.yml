@@ -5,6 +5,14 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  # 手動実行を可能にする
+  workflow_dispatch:
+    inputs:
+      deploy_enabled:
+        description: 'デプロイを実行するか'
+        required: false
+        default: true
+        type: boolean
 
 env:
   REGISTRY: docker.io
@@ -116,11 +124,14 @@ jobs:
         push: false
         tags: ${{ env.FRONTEND_IMAGE_NAME }}:test
 
-  # Docker イメージビルドとプッシュ（mainブランチのみ）
+  # Docker イメージビルドとプッシュ（mainブランチまたは手動実行時のみ）
+  # 📋 必要なRepository Secrets:
+  #   - DOCKER_USERNAME: Docker Hubのユーザー名 (majikijima)
+  #   - DOCKER_PASSWORD: Docker Hubのアクセストークン
   build-and-push:
     runs-on: ubuntu-latest
     needs: [test-backend, test-frontend, build-test]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
     
     steps:
     - uses: actions/checkout@v4
@@ -178,7 +189,7 @@ jobs:
   security-scan:
     runs-on: ubuntu-latest
     needs: [build-and-push]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch')
     
     steps:
     - uses: actions/checkout@v4
@@ -200,8 +211,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: [build-and-push, security-scan]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    environment: production
+    if: ((github.ref == 'refs/heads/main' && github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && github.event.inputs.deploy_enabled == 'true'))
     
     steps:
     - uses: actions/checkout@v4
