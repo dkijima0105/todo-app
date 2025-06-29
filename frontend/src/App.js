@@ -259,9 +259,7 @@ function App() {
 
   // 仮タスクをクリアする処理
   const clearTempTask = () => {
-    console.log('🗑️ clearTempTask called', { tempTaskActive, isTaskEdited });
     if (tempTaskActive && !isTaskEdited) {
-      console.log('✅ Clearing temp task');
       setCurrentEditingTask(null);
       setTempTaskActive(false);
       setIsTaskEdited(false);
@@ -269,20 +267,16 @@ function App() {
         setShowTaskFormModal(false);
       }
       setPrefilledTaskData(null);
-    } else {
-      console.log('❌ Not clearing temp task', { tempTaskActive, isTaskEdited });
     }
   };
 
   // タスクが編集されたことを記録
   const handleTaskEditChange = (edited) => {
-    console.log('✏️ Task edit changed:', edited);
     setIsTaskEdited(edited);
   };
 
   // カレンダーの時間ブロッククリック処理
   const handleCalendarTimeSlotClick = (presetData) => {
-    console.log('📅 Calendar time slot clicked', presetData);
     // 既存の仮タスクがあればクリア
     if (tempTaskActive) {
       clearTempTask();
@@ -291,7 +285,6 @@ function App() {
     setPrefilledTaskData(presetData);
     setTempTaskActive(true);
     setIsTaskEdited(false);
-    console.log('🔧 Temp task activated');
     
     // リアルタイム編集用の初期データを作成（仮タスクとして表示）
     const initialEditingTask = {
@@ -314,7 +307,6 @@ function App() {
 
   // カレンダーの空白エリアクリック処理（仮タスクを削除）
   const handleCalendarEmptyClick = () => {
-    console.log('🖱️ Calendar empty area clicked');
     clearTempTask();
   };
 
@@ -357,7 +349,6 @@ function App() {
       }
       // カレンダー表示時のみ仮タスクをクリア
       if (viewMode === 'calendar') {
-        console.log('🖱️ App container clicked (calendar mode)');
         handleCalendarEmptyClick();
       }
     }}>
@@ -377,7 +368,6 @@ function App() {
               }
               // カレンダー表示時のみ仮タスクをクリア
               if (viewMode === 'calendar') {
-                console.log('🖱️ Matrix area clicked (calendar mode)');
                 handleCalendarEmptyClick();
               }
             }}>
@@ -492,11 +482,10 @@ function App() {
                 if (e.target.closest('.calendar-day, .week-time-cell, .day-time-cell, .week-allday-cell, .day-allday-cell')) {
                   return;
                 }
-                // カレンダー表示時のみ仮タスクをクリア
-                if (viewMode === 'calendar') {
-                  console.log('🖱️ Task detail area clicked (calendar mode)');
-                  handleCalendarEmptyClick();
-                }
+                          // カレンダー表示時のみ仮タスクをクリア
+          if (viewMode === 'calendar') {
+            handleCalendarEmptyClick();
+          }
               }}>
                 {selectedTask ? (
                   <div className="glass-card">
@@ -555,7 +544,6 @@ function App() {
             <div className="task-form-overlay" onClick={(e) => {
               // モーダルの外側をクリックした場合は仮タスクをクリア
               if (e.target === e.currentTarget) {
-                console.log('🖱️ Modal overlay clicked');
                 clearTempTask();
                 setShowTaskFormModal(false);
                 setPrefilledTaskData(null);

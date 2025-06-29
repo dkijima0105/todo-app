@@ -85,7 +85,7 @@ function TaskForm({ onSubmit, prefilledData, onRealTimeUpdate, onEditChange }) {
       }
     }
     return null;
-  }, [formData.due_year, formData.due_month, formData.due_day, formData.due_hour, formData.due_minute, formData.is_all_day]);
+  }, [formData]);
 
   // リアルタイム更新: formDataが変更されたときにカレンダーに反映
   useEffect(() => {
@@ -117,7 +117,6 @@ function TaskForm({ onSubmit, prefilledData, onRealTimeUpdate, onEditChange }) {
     if (onEditChange && (name === 'title' || name === 'description')) {
       const updatedFormData = { ...formData, [name]: value };
       const isEdited = updatedFormData.title.trim() !== '' || updatedFormData.description.trim() !== '';
-      console.log('📝 Form data changed:', { name, value, isEdited });
       onEditChange(isEdited);
     }
   };

@@ -310,7 +310,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
     setDraggedTask(task);
     e.dataTransfer.effectAllowed = 'move';
     e.target.style.opacity = '0.5';
-    console.log('🎯 Drag started:', task.title);
   };
 
   // ドラッグ終了時の処理
@@ -318,7 +317,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
     e.target.style.opacity = '1';
     setDraggedTask(null);
     setDragOverDate(null);
-    console.log('🎯 Drag ended');
   };
 
   // ドラッグオーバー時の処理
@@ -346,9 +344,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
     try {
       // 新しい期限を計算
       const newDueDate = calculateNewDueDate(draggedTask, targetDate);
-      
-      console.log('🎯 Dropping task:', draggedTask.title);
-      console.log('🎯 New due date:', newDueDate);
 
       // タスクを更新
       const updatedTaskData = {
@@ -358,14 +353,10 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
 
       const result = await onTaskUpdate(draggedTask.id, updatedTaskData);
       
-      if (result) {
-        console.log('✅ Task date updated successfully');
-      } else {
-        console.error('❌ Failed to update task date');
+      if (!result) {
         alert('タスクの期限更新に失敗しました');
       }
     } catch (error) {
-      console.error('❌ Error updating task date:', error);
       alert('タスクの期限更新中にエラーが発生しました');
     }
 
@@ -380,8 +371,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
     if (!draggedTask) return;
 
     try {
-      console.log('🎯 Dropping task to all-day:', draggedTask.title);
-      
       // 終日タスクとして更新
       const newDate = new Date(targetDate);
       newDate.setHours(23, 59, 59, 0);
@@ -394,14 +383,10 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
 
       const result = await onTaskUpdate(draggedTask.id, updatedTaskData);
       
-      if (result) {
-        console.log('✅ Task converted to all-day successfully');
-      } else {
-        console.error('❌ Failed to convert task to all-day');
+      if (!result) {
         alert('終日タスクへの変換に失敗しました');
       }
     } catch (error) {
-      console.error('❌ Error converting task to all-day:', error);
       alert('終日タスクへの変換中にエラーが発生しました');
     }
 
@@ -416,8 +401,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
     if (!draggedTask) return;
 
     try {
-      console.log('🎯 Dropping task to time slot:', draggedTask.title, hour, minute);
-      
       // 時間指定タスクとして更新
       const newDate = new Date(targetDate);
       newDate.setHours(hour, minute, 0, 0);
@@ -430,14 +413,10 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
 
       const result = await onTaskUpdate(draggedTask.id, updatedTaskData);
       
-      if (result) {
-        console.log('✅ Task converted to timed task successfully');
-      } else {
-        console.error('❌ Failed to convert task to timed task');
+      if (!result) {
         alert('時間指定タスクへの変換に失敗しました');
       }
     } catch (error) {
-      console.error('❌ Error converting task to timed task:', error);
       alert('時間指定タスクへの変換中にエラーが発生しました');
     }
 
@@ -481,7 +460,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
       }
       // カレンダー以外の部分をクリックした場合は仮タスクをクリア
       if (onEmptyClick && !e.target.closest('.calendar-grid, .week-view, .day-view')) {
-        console.log('🖱️ Calendar view outer area clicked');
         onEmptyClick();
       }
     }}>
@@ -493,7 +471,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
           }
           // ヘッダーエリアをクリックした場合は仮タスクをクリア
           if (onEmptyClick) {
-            console.log('🖱️ Calendar header area clicked');
             e.stopPropagation(); // 親要素への伝播を防ぐ
             onEmptyClick();
           }
@@ -552,7 +529,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
         }
         // 背景をクリックした場合は仮タスクをクリア
         if (onEmptyClick) {
-          console.log('🖱️ Calendar grid background clicked');
           onEmptyClick();
         }
       }}>
@@ -682,7 +658,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
             }
             // 背景をクリックした場合は仮タスクをクリア
             if (onEmptyClick) {
-              console.log('🖱️ Week view background clicked');
               onEmptyClick();
             }
           }}>
@@ -705,7 +680,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
               }
               // 背景をクリックした場合は仮タスクをクリア
               if (onEmptyClick) {
-                console.log('🖱️ Week content background clicked');
                 onEmptyClick();
               }
             }}>
@@ -843,7 +817,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
             }
             // 背景をクリックした場合は仮タスクをクリア
             if (onEmptyClick) {
-              console.log('🖱️ Day view background clicked');
               onEmptyClick();
             }
           }}>
@@ -860,11 +833,10 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
               if (e.target.closest('.day-time-cell, .day-allday-cell')) {
                 return;
               }
-              // 背景をクリックした場合は仮タスクをクリア
-              if (onEmptyClick) {
-                console.log('🖱️ Day content background clicked');
-                onEmptyClick();
-              }
+                          // 背景をクリックした場合は仮タスクをクリア
+            if (onEmptyClick) {
+              onEmptyClick();
+            }
             }}>
               {/* 終日行 */}
               <div className="day-allday-row">
@@ -986,12 +958,11 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
 
       {/* カレンダー統計 */}
       <div className="calendar-stats" onClick={(e) => {
-        // 統計エリアをクリックした場合は仮タスクをクリア
-        if (onEmptyClick) {
-          console.log('🖱️ Calendar stats area clicked');
-          e.stopPropagation(); // 親要素への伝播を防ぐ
-          onEmptyClick();
-        }
+                  // 統計エリアをクリックした場合は仮タスクをクリア
+          if (onEmptyClick) {
+            e.stopPropagation(); // 親要素への伝播を防ぐ
+            onEmptyClick();
+          }
       }}>
         <div className="stats-item">
           <span className="stats-label">今月のタスク:</span>
@@ -1031,7 +1002,6 @@ function CalendarView({ tasks, onTaskClick, onTaskUpdate, onTaskAdd, onEmptyClic
       <div className="future-features" onClick={(e) => {
         // 将来の機能説明エリアをクリックした場合は仮タスクをクリア
         if (onEmptyClick) {
-          console.log('🖱️ Future features area clicked');
           e.stopPropagation(); // 親要素への伝播を防ぐ
           onEmptyClick();
         }
