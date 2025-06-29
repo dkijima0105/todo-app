@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 
 function EisenhowerMatrix({ tasks, onTaskClick, onTaskUpdate }) {
   const [draggedTask, setDraggedTask] = useState(null);
@@ -176,7 +176,7 @@ function EisenhowerMatrix({ tasks, onTaskClick, onTaskUpdate }) {
             };
             
             try {
-              const result = await currentOnTaskUpdate(updatedTask);
+              await currentOnTaskUpdate(updatedTask);
               console.log('🎯 タスク更新成功');
             } catch (error) {
               console.error('🎯 タスク更新エラー:', error);
