@@ -27,6 +27,8 @@ React、Django REST Framework、nginxを使用したモダンなタスク管理�
 
 #### メインブランチのプッシュ時:
 - ✅ **フルテストスイート**: バックエンド・フロントエンドの包括的テスト
+  - Django: 12テストケース（Model、API、Filter）
+  - React: 7テストケース（コンポーネント、統合）
 - ✅ **Docker イメージビルド**: 本番環境用イメージの作成
 - ✅ **セキュリティスキャン**: Trivy による脆弱性スキャン
 - ✅ **Docker Hub プッシュ**: 本番用イメージの自動デプロイ
@@ -50,32 +52,80 @@ React、Django REST Framework、nginxを使用したモダンなタスク管理�
    - Docker イメージビルド・プッシュ
    - セキュリティスキャン
    - 本番デプロイ
+   - **🎯 手動実行対応**: GitHubのActionsタブから「Run workflow」で実行可能
 
 3. **Dependabot** (`.github/dependabot.yml`):
    - 依存関係の自動更新
    - セキュリティパッチの自動適用
    - 毎週月曜日に更新チェック
 
+### 🚀 CI/CD実行方法
+
+#### 自動実行
+- **プルリクエスト作成時**: テストとコード品質チェックを自動実行
+- **メインブランチへのプッシュ**: フルCI/CDパイプラインを自動実行
+
+#### 手動実行
+1. GitHubリポジトリの **Actions** タブを開く
+2. 「CI/CD Pipeline」ワークフローを選択
+3. **Run workflow** ボタンをクリック
+4. ブランチを選択し、デプロイ有効/無効を選択
+5. **Run workflow** で実行開始
+
 ## ⚙️ CI/CD セットアップ
 
-### 必要なシークレット設定
+### 📋 必要なRepository Secrets設定
 
-GitHub リポジトリで以下のシークレットを設定してください：
+CI/CDパイプラインを完全に動作させるには、以下のGitHub Repository Secretsを設定する必要があります：
 
-1. **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+#### 設定手順
+1. GitHubリポジトリページで **Settings** → **Secrets and variables** → **Actions**
+2. **Repository secrets** → **New repository secret**
+3. 以下の2つのシークレットを追加：
 
-2. 必要なシークレット:
-   ```
-   DOCKER_USERNAME    # Docker Hub のユーザー名
-   DOCKER_PASSWORD    # Docker Hub のアクセストークン
-   ```
+| Name | Value | 説明 |
+|------|-------|------|
+| `DOCKER_USERNAME` | `majikijima` | Docker Hubのユーザー名 |
+| `DOCKER_PASSWORD` | `[アクセストークン]` | Docker Hubで生成したアクセストークン |
 
-### Docker Hub のアクセストークン作成
+### 🐳 Docker Hub設定
 
+#### アクセストークン作成手順
 1. [Docker Hub](https://hub.docker.com) にログイン
 2. **Account Settings** → **Security** → **New Access Token**
-3. トークン名を入力し、**Generate** をクリック
-4. 生成されたトークンを `DOCKER_PASSWORD` として設定
+3. トークン名を入力（例：`github-actions-todo-app`）
+4. 権限を選択（**Public Repo Read/Write** を推奨）
+5. **Generate** をクリックしてトークンを生成
+6. 生成されたトークンをコピーし、GitHubの `DOCKER_PASSWORD` シークレットに設定
+
+#### 対象Dockerイメージ
+CI/CDパイプラインでは以下のイメージをDocker Hubにプッシュします：
+- `majikijima/todo-app-backend` - Djangoバックエンド
+- `majikijima/todo-app-frontend` - Reactフロントエンド
+- `majikijima/todo-app-nginx` - nginx設定
+
+### ⚠️ 注意事項
+- Repository Secretsが設定されていないとDocker Hub関連のジョブが失敗します
+- アクセストークンは安全に管理し、必要に応じて定期的に更新してください
+- 初回実行時はDocker Hubに自動でリポジトリが作成されます
+
+### 📊 CI/CDパイプライン実行結果
+現在のパイプラインでは以下の成果を達成しています：
+
+#### ✅ テスト成功率
+- **Django テスト**: 12/12 テスト成功
+  - TaskModelTest: 4テスト（作成、表示、期限切れ判定、優先度分類）
+  - TaskAPITest: 6テスト（CRUD操作、完了状態切り替え、フィルタ）
+  - TaskFilterTest: 2テスト（完了・未完了フィルタ）
+- **React テスト**: 7/7 テスト成功
+  - App.test.js: 2テスト（レンダリング、基本機能）
+  - TaskItem.test.js: 2テスト（表示、完了切り替え）
+  - TaskForm.test.js: 3テスト（フォーム表示、入力、送信）
+
+#### ✅ コード品質
+- **Python**: Black, isort, flake8 によるコードスタイル統一
+- **JavaScript**: ESLint による構文チェック・品質保証
+- **Docker**: マルチステージビルドによる軽量イメージ作成
 
 ### ローカル開発でのコード品質チェック
 
@@ -127,8 +177,8 @@ npm run build
 
 1. **リポジトリをクローン**
    ```bash
-   git clone <repository-url>
-   cd React-practice
+   git clone https://github.com/dkijima0105/todo-app.git
+   cd todo-app
    ```
 
 2. **Docker Composeでアプリケーションを起動**
@@ -194,7 +244,7 @@ npm run build
 ## 📁 プロジェクト構造
 
 ```
-React-practice/
+todo-app/
 ├── backend/                # Django REST Framework バックエンド
 │   ├── taskmanager/       # プロジェクト設定
 │   └── tasks/             # タスクアプリ
