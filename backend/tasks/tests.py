@@ -72,10 +72,16 @@ class TaskAPITest(APITestCase):
         url = reverse("task-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # 既存のデータベースの状態に関係なく、作成したタスクが含まれることを確認
-        self.assertGreaterEqual(len(response.data), 1)
-        # 作成したタスクが結果に含まれることを確認
-        task_titles = [task["title"] for task in response.data]
+
+        # レスポンスがページネーションされている場合の処理
+        if isinstance(response.data, dict) and "results" in response.data:
+            tasks = response.data["results"]
+        else:
+            tasks = response.data
+
+        # 作成したタスクが含まれることを確認
+        self.assertGreaterEqual(len(tasks), 1)
+        task_titles = [task["title"] for task in tasks]
         self.assertIn("APIテストタスク", task_titles)
 
     def test_create_task(self):
@@ -148,8 +154,15 @@ class TaskFilterTest(APITestCase):
         url = reverse("task-completed")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # レスポンスがページネーションされている場合の処理
+        if isinstance(response.data, dict) and "results" in response.data:
+            tasks = response.data["results"]
+        else:
+            tasks = response.data
+
         # 完了済みタスクが含まれることを確認
-        completed_titles = [task["title"] for task in response.data]
+        completed_titles = [task["title"] for task in tasks]
         self.assertIn("完了済みタスク", completed_titles)
         # 未完了タスクは含まれないことを確認
         self.assertNotIn("未完了タスク", completed_titles)
@@ -159,8 +172,15 @@ class TaskFilterTest(APITestCase):
         url = reverse("task-pending")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # レスポンスがページネーションされている場合の処理
+        if isinstance(response.data, dict) and "results" in response.data:
+            tasks = response.data["results"]
+        else:
+            tasks = response.data
+
         # 未完了タスクが含まれることを確認
-        pending_titles = [task["title"] for task in response.data]
+        pending_titles = [task["title"] for task in tasks]
         self.assertIn("未完了タスク", pending_titles)
         # 完了済みタスクは含まれないことを確認
         self.assertNotIn("完了済みタスク", pending_titles)
