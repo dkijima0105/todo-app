@@ -9,6 +9,88 @@ React、Django REST Framework、nginxを使用したモダンなタスク管理�
 - **データベース**: PostgreSQL
 - **Webサーバー**: nginx
 - **開発環境**: Docker & Docker Compose
+- **CI/CD**: GitHub Actions
+- **コード品質**: Black, isort, flake8, ESLint
+- **セキュリティ**: Trivy vulnerability scanner
+- **依存関係管理**: Dependabot
+
+## 🔄 CI/CD パイプライン
+
+このプロジェクトは GitHub Actions を使用した包括的な CI/CD パイプラインを実装しています。
+
+### 🧪 継続的インテグレーション (CI)
+
+#### プルリクエスト時の自動チェック:
+- ✅ **コード品質チェック**: Python (Black, isort, flake8) と JavaScript (ESLint)
+- ✅ **自動テスト**: Django テストと React テストの実行
+- ✅ **依存関係チェック**: セキュリティ脆弱性の確認
+
+#### メインブランチのプッシュ時:
+- ✅ **フルテストスイート**: バックエンド・フロントエンドの包括的テスト
+- ✅ **Docker イメージビルド**: 本番環境用イメージの作成
+- ✅ **セキュリティスキャン**: Trivy による脆弱性スキャン
+- ✅ **Docker Hub プッシュ**: 本番用イメージの自動デプロイ
+
+### 🚀 継続的デプロイメント (CD)
+
+- **Docker イメージ**: 自動的に Docker Hub にプッシュ
+- **バージョン管理**: Git コミットハッシュとブランチ名でタグ付け
+- **セキュリティ**: GitHub Security タブで脆弱性レポート
+- **自動デプロイ**: 本番環境への自動デプロイ（設定次第）
+
+### 📊 ワークフロー
+
+1. **PR Check** (`pr-check.yml`):
+   - コードの品質チェック
+   - 基本テストの実行
+   - プルリクエストの自動検証
+
+2. **Main CI/CD** (`ci-cd.yml`):
+   - フルテストスイート
+   - Docker イメージビルド・プッシュ
+   - セキュリティスキャン
+   - 本番デプロイ
+
+3. **Dependabot** (`.github/dependabot.yml`):
+   - 依存関係の自動更新
+   - セキュリティパッチの自動適用
+   - 毎週月曜日に更新チェック
+
+## ⚙️ CI/CD セットアップ
+
+### 必要なシークレット設定
+
+GitHub リポジトリで以下のシークレットを設定してください：
+
+1. **Settings** → **Secrets and variables** → **Actions** → **New repository secret**
+
+2. 必要なシークレット:
+   ```
+   DOCKER_USERNAME    # Docker Hub のユーザー名
+   DOCKER_PASSWORD    # Docker Hub のアクセストークン
+   ```
+
+### Docker Hub のアクセストークン作成
+
+1. [Docker Hub](https://hub.docker.com) にログイン
+2. **Account Settings** → **Security** → **New Access Token**
+3. トークン名を入力し、**Generate** をクリック
+4. 生成されたトークンを `DOCKER_PASSWORD` として設定
+
+### ローカル開発でのコード品質チェック
+
+```bash
+# Python コードフォーマット
+cd backend
+pip install black isort flake8
+black .
+isort .
+flake8 .
+
+# JavaScript コードチェック
+cd frontend
+npm run build
+```
 
 ## ✨ 機能
 
