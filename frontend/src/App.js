@@ -55,6 +55,7 @@ function App() {
       setTasks(tasksArray);
       setFilteredTasks(tasksArray);
     } catch (error) {
+      // エラーはユーザーに表示される
       console.error('タスクの取得に失敗しました:', error);
       setTasks([]);
       setFilteredTasks([]);
@@ -125,7 +126,7 @@ function App() {
           setSelectedTask(updatedTask);
         }
         
-        console.log('タスクが正常に更新されました:', updatedTask);
+
         return updatedTask;
       } else {
         const errorData = await response.json();
@@ -346,7 +347,6 @@ function App() {
                         tasks={filteredTasks} 
                         onTaskClick={handleTaskClick}
                         onTaskUpdate={async (updatedTask) => {
-                          console.log('App.js: onTaskUpdate呼び出し', updatedTask);
                           return await updateTask(updatedTask.id, updatedTask);
                         }}
                       />

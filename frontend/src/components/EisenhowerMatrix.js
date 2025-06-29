@@ -111,7 +111,6 @@ function EisenhowerMatrix({ tasks, onTaskClick, onTaskUpdate }) {
       
       // 5ピクセル以上移動したらドラッグ開始
       if (!currentIsDragging && distance > 5) {
-        console.log('🎯 ドラッグ開始');
         setIsDragging(true);
         document.body.classList.add('drag-in-progress');
       }
@@ -151,7 +150,6 @@ function EisenhowerMatrix({ tasks, onTaskClick, onTaskUpdate }) {
       const { draggedTask: currentDraggedTask, isDragging: currentIsDragging, mouseDownStartTime: currentMouseDownStartTime, dragOverQuadrant: currentDragOverQuadrant, onTaskClick: currentOnTaskClick, onTaskUpdate: currentOnTaskUpdate } = stateRef.current;
       
       if (!currentDraggedTask || !currentMouseDownStartTime) {
-        console.log('🎯 不正な状態でスキップ');
         return;
       }
       
@@ -163,7 +161,6 @@ function EisenhowerMatrix({ tasks, onTaskClick, onTaskUpdate }) {
       } else if (currentIsDragging) {
         // ドラッグ&ドロップ処理
         if (currentDragOverQuadrant && currentOnTaskUpdate) {
-          console.log('🎯 ドロップ実行:', currentDraggedTask.title);
           
           // 異なる象限にドロップされた場合のみ更新
           if (currentDraggedTask.importance !== currentDragOverQuadrant.importance || 
@@ -177,9 +174,9 @@ function EisenhowerMatrix({ tasks, onTaskClick, onTaskUpdate }) {
             
             try {
               await currentOnTaskUpdate(updatedTask);
-              console.log('🎯 タスク更新成功');
             } catch (error) {
-              console.error('🎯 タスク更新エラー:', error);
+              // エラーはユーザーに通知
+              console.error('タスク更新エラー:', error);
               alert('タスクの更新に失敗しました: ' + error.message);
             }
                       }

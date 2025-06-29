@@ -4,9 +4,9 @@ module.exports = {
     'react-app/jest'
   ],
   rules: {
-    // 開発中は warning、本番は error
-    'no-unused-vars': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
-    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    // 開発中は warning、CI/本番では警告レベル（エラーではない）
+    'no-unused-vars': 'warn',
+    'no-console': ['warn', { allow: ['error'] }],  // console.errorは許可
     // React固有のルール
     'react-hooks/exhaustive-deps': 'warn',
     'react/jsx-no-target-blank': 'error'

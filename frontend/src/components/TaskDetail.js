@@ -164,13 +164,7 @@ function TaskDetail({ task, onUpdate, onDelete, onClose, isModal = true }) {
       is_all_day: editData.is_all_day
     };
 
-    console.log('保存データ:', updateData);
-    console.log('期限データ詳細:', {
-      is_all_day: editData.is_all_day,
-      due_hour: editData.due_hour,
-      due_minute: editData.due_minute,
-      constructed_date: due_date
-    });
+    // データの更新処理を実行
 
     const result = await onUpdate(task.id, updateData);
     if (result) {
@@ -184,7 +178,6 @@ function TaskDetail({ task, onUpdate, onDelete, onClose, isModal = true }) {
     try {
       const updatedTask = await onUpdate(task.id, { completed: !task.completed });
       if (updatedTask) {
-        console.log('完了状態が更新されました:', updatedTask.completed ? '完了' : '未完了');
         showSuccessNotification();
       }
     } catch (error) {
